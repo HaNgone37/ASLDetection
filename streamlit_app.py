@@ -11,33 +11,14 @@ import gdown
 MODEL_ID = "1-qtMLem63El7msIK84PzMmMTvgyr9T1_"  # Google Drive file ID
 MODEL_PATH = "hand_sign_cnn_model.h5"
 IMG_SIZE = 224
-#LABELS = sorted(os.listdir("./data"))  # Cùng thứ tự như khi train
-LABELS = [
-    'A', 'B', 'C', 'D', 'del', 'E', 'F', 'G', 'H', 'I', 'J',
-    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-    'U', 'V', 'W', 'X', 'Y', 'Z', 'space'
-]
-# ==== TẢI MODEL ==== 
+LABELS = sorted(os.listdir("./data"))  # Cùng thứ tự như khi train
+
+# ==== TẢI MODEL ====
 @st.cache_resource
 def load_model():
     if not os.path.exists(MODEL_PATH):
-        # Tạo đường dẫn URL từ Google Drive file ID
-        url = f"https://drive.google.com/uc?id={MODEL_ID}"
-
-        # Tải file từ Google Drive
-        try:
-            gdown.download(url, MODEL_PATH, quiet=False)
-        except Exception as e:
-            st.error("Không thể tải mô hình từ Google Drive. Vui lòng kiểm tra kết nối hoặc chia sẻ tệp.")
-            raise e
-
-    # Tải mô hình TensorFlow từ file .h5
-    try:
-        model = tf.keras.models.load_model(MODEL_PATH)
-        return model
-    except Exception as e:
-        st.error("Không thể tải mô hình từ tệp .h5. Vui lòng kiểm tra định dạng mô hình.")
-        raise e
+        gdown.download(id=MODEL_ID, output=MODEL_PATH, quiet=False)
+    return tf.keras.models.load_model(MODEL_PATH)
 
 # ==== TIỀN XỬ LÝ ẢNH ====
 def preprocess_image(img_bgr):
@@ -61,17 +42,13 @@ def preprocess_image(img_bgr):
 st.set_page_config(page_title="Nhận diện ký hiệu tay", layout="centered")
 
 st.markdown("""
-    <h1 style='text-align: center; color: #ff4b4b;'>🤟 Nhận diện Ký hiệu Tay bằng CNN</h1>
+    <h1 style='text-align: center; color: #ff4b4b;'>Nhận diện Ký hiệu Tay bằng CNN</h1>
     <p style='text-align: center;'>Tải lên ảnh ký hiệu tay để dự đoán chữ cái. Ứng dụng sử dụng TensorFlow + Streamlit Cloud.</p>
     """, unsafe_allow_html=True)
 
 st.markdown("---")
 
-uploaded_file = st.file_uploader("📤 Tải ảnh ký hiệu tay (jpg, png)", type=["jpg", "jpeg", "png"])
-
-# Nút thử lại
-if st.button("🔁 Làm mới"):
-    st.experimental_rerun()
+uploaded_file = st.file_uploader("Tải ảnh ký hiệu tay (jpg, png)", type=["jpg", "jpeg", "png"])
 
 if uploaded_file:
     st.image(uploaded_file, caption="Ảnh bạn đã chọn", width=300)
@@ -91,7 +68,7 @@ if uploaded_file:
     # Hiển thị kết quả
     st.markdown(f"""
         <h2 style='text-align:center;'>
-            🔤 Dự đoán: <span style='color:#4CAF50'>{LABELS[pred_index]}</span> 
+            Dự đoán: <span style='color:#4CAF50'>{LABELS[pred_index]}</span> 
             (Độ tin cậy: {confidence:.2f})
         </h2>
         """, unsafe_allow_html=True)
