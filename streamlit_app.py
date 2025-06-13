@@ -17,14 +17,27 @@ LABELS = [
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z', 'space'
 ]
-
-
-# ==== TẢI MODEL ====
+# ==== TẢI MODEL ==== 
 @st.cache_resource
 def load_model():
     if not os.path.exists(MODEL_PATH):
-        gdown.download(id=MODEL_ID, output=MODEL_PATH, quiet=False)
-    return tf.keras.models.load_model(MODEL_PATH)
+        # Tạo đường dẫn URL từ Google Drive file ID
+        url = f"https://drive.google.com/uc?id={MODEL_ID}"
+
+        # Tải file từ Google Drive
+        try:
+            gdown.download(url, MODEL_PATH, quiet=False)
+        except Exception as e:
+            st.error("Không thể tải mô hình từ Google Drive. Vui lòng kiểm tra kết nối hoặc chia sẻ tệp.")
+            raise e
+
+    # Tải mô hình TensorFlow từ file .h5
+    try:
+        model = tf.keras.models.load_model(MODEL_PATH)
+        return model
+    except Exception as e:
+        st.error("Không thể tải mô hình từ tệp .h5. Vui lòng kiểm tra định dạng mô hình.")
+        raise e
 
 # ==== TIỀN XỬ LÝ ẢNH ====
 def preprocess_image(img_bgr):
